@@ -1,0 +1,67 @@
+project:
+  name: "NeuroPulse AI - EEG Alzheimer's & Depression Prediction System"
+  version: "1.0.0"
+  institution: "University of Mumbai - YTIET"
+  seed: 42
+
+data:
+  sfreq: 256
+  n_channels: 19
+  n_samples_per_class: 35
+  recording_duration: 6.0
+  channels:
+    - Fp1
+    - Fp2
+    - F7
+    - F3
+    - Fz
+    - F4
+    - F8
+    - T3
+    - C3
+    - Cz
+    - C4
+    - T4
+    - T5
+    - P3
+    - Pz
+    - P4
+    - T6
+    - O1
+    - O2
+
+preprocessing:
+  notch_freq: 50.0
+  bandpass_low: 0.5
+  bandpass_high: 45.0
+  epoch_duration: 2.0
+  overlap: 0.5
+  enable_ica: true
+  ica_components: 15
+  kurtosis_threshold: 5.0
+
+feature_extraction:
+  wavelet_name: "db4"
+  wavelet_level: 5
+  n_features_per_channel: 28
+
+model:
+  n_classes: 3
+  embedding_dim: 64
+  dropout_rate: 0.3
+  epochs: 30
+  batch_size: 32
+  learning_rate: 0.001
+  fusion_strategy: "weighted_voting"
+  ensemble_weights:
+    cnn: 0.40
+    svm: 0.40
+    knn: 0.20
+  svm:
+    C: 10.0
+    kernel: "rbf"
+    gamma: "scale"
+  knn:
+    n_neighbors: 5
+    weights: "distance"
+    metric: "euclidean"

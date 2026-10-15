@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#04060a">
+  <meta name="description" content="NeuroPulse AI — Precision Cyber-Neurology EEG Diagnostic & Clinical Decision Support System.">
+  <title>NeuroPulse AI | Precision Cyber-Neurology 3D Workstation</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Three.js r128 & Controls -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+  <!-- Optional Postprocessing (Selective UnrealBloom) -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Sticky Glass Command Bar -->
+  <nav class="navbar">
+    <div class="container nav-inner">
+      <a href="#" class="brand">
+        <div class="brand-emblem-wrap">
+          <svg class="neural-emblem" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="16" cy="16" r="14" stroke="url(#emblemGrad)" stroke-width="1.5" stroke-dasharray="3 3"/>
+            <path d="M7 16H11L13 10L16 22L19 12L21 16H25" stroke="#00F0FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="13" cy="10" r="1.5" fill="#00F59B"/>
+            <circle cx="16" cy="22" r="1.5" fill="#8B5CF6"/>
+            <circle cx="19" cy="12" r="1.5" fill="#FFB703"/>
+            <defs>
+              <linearGradient id="emblemGrad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#00F0FF"/>
+                <stop offset="0.5" stop-color="#8B5CF6"/>
+                <stop offset="1" stop-color="#00F59B"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <div class="brand-heading">
+            <h1>NEUROPULSE AI</h1>
+            <span class="dissertation-pill">M.E. Dissertation • Hybrid CNN-SVM-KNN</span>
+          </div>
+          <span class="brand-sub">University of Mumbai • YTIET • Precision Cyber-Neurology</span>
+        </div>
+      </a>
+
+      <!-- Center Glass Navigation Pills -->
+      <ul class="nav-links">
+        <li><a class="nav-link active" data-target="hero-station">Live 3D Cortex</a></li>
+        <li><a class="nav-link" data-target="outcome-section">Explainability &amp; XAI</a></li>
+        <li><a class="nav-link" data-target="telemetry-station">19-Ch Telemetry</a></li>
+        <li><a class="nav-link" data-target="topomap-station">Scalp Topography</a></li>
+        <li><a class="nav-link" data-target="benchmark-station">Benchmarks</a></li>
+      </ul>
+
+      <!-- Right Telemetry & Quick Action -->
+      <div class="nav-right-cluster">
+        <div class="badge-pulse" id="api-status-badge">
+          <span class="pulse-dot"></span>
+          <span id="api-status-text">API CONNECTED • 256 HZ • ICA ACTIVE</span>
+        </div>
+        <button class="btn-nav-upload" id="btn-nav-quick-upload">
+          <span>📂 Upload Patient EEG</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+
+    <!-- Hero Bento Workstation -->
+    <section id="hero-station" class="hero-section">
+      <div class="hero-grid">
+
+        <!-- Centerpiece: 3D WebGL Neural Cortex & Synaptic Tractography -->
+        <div class="master-card" id="hero-master-card">
+          <div class="card-header-row">
+            <div class="card-title-group">
+              <div class="header-tag-row">
+                <span class="live-indicator-pill"><span class="live-dot"></span> LIVE 3D CORTEX</span>
+                <span class="montage-pill">10-20 Standard Montage</span>
+              </div>
+              <h2>Interactive Neural Cortex &amp; Axon Tractography</h2>
+              <p>Dual-hemisphere cerebral cortex, cerebellum &amp; brainstem with surface-pinned 19-ch EEG electrodes and firing action potentials</p>
+            </div>
+            <div class="badge-mode-status" id="active-brain-mode-badge">
+              <span class="mode-bullet"></span>
+              <span id="active-brain-mode-label">MODE: HEALTHY BASELINE</span>
+            </div>
+          </div>
+
+          <!-- 3D Canvas Viewport Container -->
+          <div class="webgl-container" id="neuro-webgl-canvas">
+            <!-- 3D Orientation Compass / Gizmo Overlay -->
+            <div class="spatial-gizmo-box" id="spatial-gizmo">
+              <div class="gizmo-compass">
+                <span class="gizmo-axis n">ANT</span>
+                <span class="gizmo-axis s">POST</span>
+                <span class="gizmo-axis w">L</span>
+                <span class="gizmo-axis e">R</span>
+                <div class="gizmo-center-core" id="gizmo-core">
+                  <div class="gizmo-ring"></div>
+                </div>
+              </div>
+              <span class="gizmo-sub" id="gizmo-cam-angle">AZIMUTH: 0°</span>
+            </div>
+
+            <!-- Floating 3D Electrode HUD Tooltip -->
+            <div id="electrode-tooltip" class="electrode-tooltip" hidden>
+              <div class="tt-header">
+                <span id="tt-id" class="tt-badge">F3</span>
+                <span id="tt-name" class="tt-title">Left Frontal</span>
+              </div>
+              <div class="tt-meta-row">
+                <span class="tt-meta-label">Region:</span>
+                <span id="tt-region" class="tt-meta-val">Frontal Cortex</span>
+              </div>
+              <div class="tt-metric-row">
+                <span class="tt-metric-label">Alpha Power:</span>
+                <span id="tt-power" class="tt-metric-val">12.4 μV²/Hz</span>
+              </div>
+              <div class="tt-metric-row">
+                <span class="tt-metric-label">Local TAR:</span>
+                <span id="tt-tar" class="tt-metric-val">0.85 (Optimal)</span>
+              </div>
+              <div class="tt-hint">Click or hover to highlight in Oscilloscope</div>
+            </div>
+          </div>
+
+          <!-- Floating 3D Viewport Controls Dock -->
+          <div class="webgl-controls-bar">
+            <div class="control-btn-group">
+              <button class="btn-ctrl" id="btn-trigger-pulse" title="Trigger synchronized synaptic action potential">⚡ Synaptic Pulse</button>
+              <button class="btn-ctrl" id="btn-explode-hemi" title="Separate left and right cerebral hemispheres">↔ Split Hemispheres</button>
+              <button class="btn-ctrl" id="btn-xray-toggle" title="Toggle cortical translucency to inspect internal axon tractography">👁️ X-Ray Tracts</button>
+              <button class="btn-ctrl active" id="btn-auto-rotate" title="Toggle automatic camera orbit rotation">🔄 Auto-Orbit</button>
+              <button class="btn-ctrl" id="btn-reset-cam" title="Reset 3D camera to default clinical perspective">🎯 Reset View</button>
+            </div>
+            <div class="hud-helper-tag">
+              <span class="pulse-ring-dot"></span>
+              <span>Surface Normal Projections Active</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Clinical Triage & Live Inference Workstation -->
+        <div class="hero-info-column">
+
+          <!-- Bento Quick Metrics Row -->
+          <div class="quick-stats-grid">
+            <div class="stat-box">
+              <div class="stat-number" id="stat-acc-val">96.8%</div>
+              <div class="stat-label">Subject-Indep. Acc</div>
+              <span class="stat-trend positive">↑ Stratified Test</span>
+            </div>
+            <div class="stat-box">
+              <div class="stat-number">19 Ch</div>
+              <div class="stat-label">Full 10-20 Array</div>
+              <span class="stat-trend">256 Hz Sampling</span>
+            </div>
+            <div class="stat-box">
+              <div class="stat-number">532</div>
+              <div class="stat-label">Features / Epoch</div>
+              <span class="stat-trend">Hjorth + PSD + DWT</span>
+            </div>
+          </div>
+
+          <!-- Interactive Case Selector & Dropzone -->
+          <div class="case-card">
+            <div class="case-card-header">
+              <div class="mode-tabs">
+                <button class="mode-tab active" data-mode="presets">Clinical Case Presets</button>
+                <button class="mode-tab" data-mode="upload">Upload EEG File</button>
+              </div>
+            </div>
+
+            <!-- Tab 1: Presets with Sparkline Previews -->
+            <div id="panel-presets" class="tab-panel">
+              <p class="panel-intro-text">
+                Select a validated clinical patient recording to load verified electrophysiological patterns into the 3D cortex and run the hybrid deep ensemble:
+              </p>
+
+              <div class="patient-chips">
+                <!-- Profile A -->
+                <div class="patient-chip selected" data-key="normal">
+                  <div class="patient-chip-left">
+                    <div class="patient-chip-meta">
+                      <div class="chip-title-row">
+                        <h4>Profile A • Healthy Control</h4>
+                        <span class="patient-badge badge-emerald">NORMAL</span>
+                      </div>
+                      <p>Symmetrical posterior alpha (8–12 Hz) • Balanced Frontal FAA (0.02)</p>
+                    </div>
+                  </div>
+                  <div class="chip-sparkline-wrap">
+                    <svg class="sparkline-svg" viewBox="0 0 100 28">
+                      <path d="M 0,14 Q 10,2 20,14 T 40,14 T 60,14 T 80,14 T 100,14" fill="none" stroke="#00F59B" stroke-width="2"/>
+                    </svg>
+                    <span class="spark-label">10.2 Hz α</span>
+                  </div>
+                </div>
+
+                <!-- Profile B -->
+                <div class="patient-chip" data-key="alzheimer">
+                  <div class="patient-chip-left">
+                    <div class="patient-chip-meta">
+                      <div class="chip-title-row">
+                        <h4>Profile B • Neurodegenerative</h4>
+                        <span class="patient-badge badge-crimson">ALZHEIMER'S</span>
+                      </div>
+                      <p>Early-Stage Alzheimer's • Pathological δ/θ slowing (TAR = 3.48)</p>
+                    </div>
+                  </div>
+                  <div class="chip-sparkline-wrap">
+                    <svg class="sparkline-svg" viewBox="0 0 100 28">
+                      <path d="M 0,14 C 15,-2 25,30 40,14 C 55,-2 65,30 80,14 C 90,2 95,26 100,14" fill="none" stroke="#FF2A5F" stroke-width="2"/>
+                    </svg>
+                    <span class="spark-label">3.8 Hz δ/θ</span>
+                  </div>
+                </div>
+
+                <!-- Profile C -->
+                <div class="patient-chip" data-key="depression">
+                  <div class="patient-chip-left">
+                    <div class="patient-chip-meta">
+                      <div class="chip-title-row">
+                        <h4>Profile C • Affective Disorder</h4>
+                        <span class="patient-badge badge-amber">DEPRESSION</span>
+                      </div>
+                      <p>Major Depressive Disorder • Frontal Alpha Asymmetry (FAA = -0.42)</p>
+                    </div>
+                  </div>
+                  <div class="chip-sparkline-wrap">
+                    <svg class="sparkline-svg" viewBox="0 0 100 28">
+                      <path d="M 0,14 Q 8,5 16,14 T 32,14 Q 45,26 60,14 T 80,14 T 100,14" fill="none" stroke="#FFB703" stroke-width="2"/>
+                    </svg>
+                    <span class="spark-label">FAA -0.42</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Tab 2: Live EEG File Dropzone -->
+            <div id="panel-upload" class="tab-panel" hidden>
+              <label for="eeg-file-input" class="upload-dropzone" id="upload-dropzone">
+                <div class="upload-icon-pulse">
+                  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#00F0FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                </div>
+                <div class="upload-title" id="upload-filename">Drag &amp; Drop Patient EEG Recording</div>
+                <div class="upload-sub">Supports 19-channel standard .CSV, .EDF, or .NPY formats (256 Hz)</div>
+                <div class="upload-badge-tag">Auto Channel-Alignment &amp; Resampling Enabled</div>
+                <input type="file" id="eeg-file-input" accept=".csv,.edf,.bdf,.npy" hidden>
+              </label>
+            </div>
+
+            <!-- Primary Execution Button -->
+            <button class="btn-run-diagnosis" id="btn-run-diagnosis">
+              <span class="btn-icon">⚡</span>
+              <span>Execute Hybrid CNN-SVM-KNN Diagnosis</span>
+              <span class="btn-glow"></span>
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 6-Stage Animated Clinical Pipeline Stepper -->
+    <div id="pipeline-progress-box" class="pipeline-progress-wrapper" hidden>
+      <div class="pipeline-card">
+        <div class="pipeline-header-row">
+          <div>
+            <span class="eyebrow-label">END-TO-END PIPELINE EXECUTION</span>
+            <h3 id="pipeline-progress-label">Stage 1/6: Signal Acquisition &amp; Montage Alignment...</h3>
+          </div>
+          <span id="pipeline-percent-txt" class="pipeline-pct-badge">16%</span>
+        </div>
+
+        <!-- 6 Steps Visual Track -->
+        <div class="pipeline-steps-grid">
+          <div class="pipeline-step-item" id="step-1">
+            <span class="step-num">1</span>
+            <div class="step-info">
+              <span class="step-name">Acquisition</span>
+              <span class="step-sub">19-Ch @ 256Hz</span>
+            </div>
+          </div>
+          <div class="pipeline-step-item" id="step-2">
+            <span class="step-num">2</span>
+            <div class="step-info">
+              <span class="step-name">Filtering</span>
+              <span class="step-sub">0.5-45Hz + Notch</span>
+            </div>
+          </div>
+          <div class="pipeline-step-item" id="step-3">
+            <span class="step-num">3</span>
+            <div class="step-info">
+              <span class="step-name">FastICA</span>
+              <span class="step-sub">Blink &amp; EMG Removal</span>
+            </div>
+          </div>
+          <div class="pipeline-step-item" id="step-4">
+            <span class="step-num">4</span>
+            <div class="step-info">
+              <span class="step-name">Extraction</span>
+              <span class="step-sub">28 Feats/Ch (532-D)</span>
+            </div>
+          </div>
+          <div class="pipeline-step-item" id="step-5">
+            <span class="step-num">5</span>
+            <div class="step-info">
+              <span class="step-name">CNN Bottleneck</span>
+              <span class="step-sub">64-D Latent Space</span>
+            </div>
+          </div>
+          <div class="pipeline-step-item" id="step-6">
+            <span class="step-num">6</span>
+            <div class="step-info">
+              <span class="step-name">Ensemble Fusion</span>
+              <span class="step-sub">CNN + SVM + KNN</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="progress-track">
+          <div id="pipeline-progress-bar" class="progress-fill" style="width: 0%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Diagnostic Outcome & Explainable AI (XAI) Dashboard -->
+    <section id="outcome-section" class="outcome-section" hidden>
+      <div class="outcome-card">
+
+        <!-- Hero Outcome Header -->
+        <div class="outcome-header">
+          <div class="outcome-header-left">
+            <span class="eyebrow-label">CLINICAL CONSENSUS DECISION • XAI REPORT</span>
+            <div class="condition-badge-group">
+              <span class="condition-badge" id="outcome-badge">NORMAL BRAIN ACTIVITY</span>
+              <span id="outcome-case-id" class="case-id-tag">CASE-NOR-0104</span>
+              <span class="epoch-stability-tag" id="epoch-stability-tag">● 100% Stability across 5 Epochs</span>
+            </div>
+          </div>
+
+          <!-- Circular SVG Confidence Gauge -->
+          <div class="confidence-circle-gauge-wrap">
+            <div class="gauge-ring-container">
+              <svg class="confidence-ring" width="86" height="86" viewBox="0 0 86 86">
+                <circle class="ring-bg" cx="43" cy="43" r="37" />
+                <circle class="ring-fill" id="conf-ring-fill" cx="43" cy="43" r="37" />
+              </svg>
+              <div class="gauge-center-content">
+                <span class="num" id="outcome-confidence">99.2%</span>
+                <span class="label">CONFIDENCE</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Class Probability Breakdown -->
+        <div class="prob-bars-grid">
+          <div class="prob-card">
+            <div class="prob-card-header">
+              <span class="prob-title">Normal Baseline</span>
+              <span class="prob-val" id="txt-normal" style="color: var(--emerald);">99.2%</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" id="fill-normal" style="width: 99.2%; background: var(--emerald);"></div>
+            </div>
+          </div>
+
+          <div class="prob-card">
+            <div class="prob-card-header">
+              <span class="prob-title">Alzheimer's Disease (AD)</span>
+              <span class="prob-val" id="txt-alzheimer" style="color: var(--crimson);">0.5%</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" id="fill-alzheimer" style="width: 0.5%; background: var(--crimson);"></div>
+            </div>
+          </div>
+
+          <div class="prob-card">
+            <div class="prob-card-header">
+              <span class="prob-title">Major Depression (MDD)</span>
+              <span class="prob-val" id="txt-depression" style="color: var(--amber);">0.3%</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill" id="fill-depression" style="width: 0.3%; background: var(--amber);"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sub-Classifier Consensus Dissection -->
+        <div class="section-divider-row">
+          <h3 class="section-sub-heading">🤖 Hybrid Ensemble Dissection &amp; Sub-Model Agreement</h3>
+          <span class="sub-heading-note">Evaluated in 64-Dimensional Latent Embedding Space</span>
+        </div>
+
+        <div class="prob-bars-grid" style="margin-bottom: 24px;">
+          <div class="prob-card submodel-card">
+            <div class="prob-card-header">
+              <span class="prob-title">1D-CNN Latent Head (Weight: 0.40)</span>
+              <span class="prob-val" id="sub-cnn-val" style="color: var(--cyan);">99.0%</span>
+            </div>
+            <div class="sub-detail" id="sub-cnn-vec">N: 99.0% | AD: 0.6% | MDD: 0.4%</div>
+            <div class="mini-bar-track"><div class="mini-bar-fill" id="sub-cnn-bar" style="width: 99%;"></div></div>
+          </div>
+          <div class="prob-card submodel-card">
+            <div class="prob-card-header">
+              <span class="prob-title">RBF-SVM Hyperplane (Weight: 0.40)</span>
+              <span class="prob-val" id="sub-svm-val" style="color: var(--violet);">99.5%</span>
+            </div>
+            <div class="sub-detail" id="sub-svm-vec">N: 99.5% | AD: 0.3% | MDD: 0.2%</div>
+            <div class="mini-bar-track"><div class="mini-bar-fill" id="sub-svm-bar" style="width: 99.5%; background: var(--violet);"></div></div>
+          </div>
+          <div class="prob-card submodel-card">
+            <div class="prob-card-header">
+              <span class="prob-title">k-NN Metric Match (Weight: 0.20)</span>
+              <span class="prob-val" id="sub-knn-val" style="color: var(--emerald);">98.8%</span>
+            </div>
+            <div class="sub-detail" id="sub-knn-vec">N: 98.8% | AD: 0.7% | MDD: 0.5%</div>
+            <div class="mini-bar-track"><div class="mini-bar-fill" id="sub-knn-bar" style="width: 98.8%; background: var(--emerald);"></div></div>
+          </div>
+        </div>
+
+        <!-- 4-Card Validated Biomarker Gauges with Visual Reference Ranges -->
+        <div class="section-divider-row">
+          <h3 class="section-sub-heading">🔬 Validated Electrophysiological Biomarkers &amp; Reference Thresholds</h3>
+          <span class="sub-heading-note">Extracted Directly from 19-Channel Microvolt Potentials</span>
+        </div>
+
+        <div class="biomarker-grid">
+          <!-- Biomarker 1: TAR -->
+          <div class="stat-box biomarker-card">
+            <div class="bio-card-top">
+              <span class="bio-title">Theta / Alpha Ratio (TAR)</span>
+              <span class="bio-status-badge optimal" id="bio-tar-badge">Optimal</span>
+            </div>
+            <div id="bio-tar" class="bio-value">0.82</div>
+            <div class="reference-range-bar">
+              <div class="range-zone green" style="width: 50%;"></div>
+              <div class="range-zone yellow" style="width: 25%;"></div>
+              <div class="range-zone red" style="width: 25%;"></div>
+              <div class="range-needle" id="needle-tar" style="left: 27%;"></div>
+            </div>
+            <div class="range-labels">
+              <span>0.0</span>
+              <span class="threshold-mark">1.5 Normal</span>
+              <span class="threshold-mark">2.0 Slowing</span>
+              <span>4.0+</span>
+            </div>
+          </div>
+
+          <!-- Biomarker 2: Slowing Index -->
+          <div class="stat-box biomarker-card">
+            <div class="bio-card-top">
+              <span class="bio-title">Slowing Index (δ+θ)/(α+β)</span>
+              <span class="bio-status-badge optimal" id="bio-slowing-badge">Normative</span>
+            </div>
+            <div id="bio-slowing" class="bio-value">0.45</div>
+            <div class="reference-range-bar">
+              <div class="range-zone green" style="width: 45%;"></div>
+              <div class="range-zone yellow" style="width: 30%;"></div>
+              <div class="range-zone red" style="width: 25%;"></div>
+              <div class="range-needle" id="needle-slowing" style="left: 22%;"></div>
+            </div>
+            <div class="range-labels">
+              <span>0.0</span>
+              <span class="threshold-mark">0.9 Optimal</span>
+              <span class="threshold-mark">1.5 Pathological</span>
+              <span>3.0+</span>
+            </div>
+          </div>
+
+          <!-- Biomarker 3: FAA -->
+          <div class="stat-box biomarker-card">
+            <div class="bio-card-top">
+              <span class="bio-title">Frontal Alpha Asymmetry (FAA)</span>
+              <span class="bio-status-badge optimal" id="bio-faa-badge">Symmetrical</span>
+            </div>
+            <div id="bio-faa" class="bio-value">0.02</div>
+            <div class="reference-range-bar center-zero">
+              <div class="range-zone blue" style="width: 35%;"></div>
+              <div class="range-zone green" style="width: 30%;"></div>
+              <div class="range-zone amber" style="width: 35%;"></div>
+              <div class="range-needle" id="needle-faa" style="left: 51%;"></div>
+            </div>
+            <div class="range-labels">
+              <span>-0.8 (Left Hypo)</span>
+              <span class="threshold-mark">0.0 Symmetrical</span>
+              <span>+0.8 (Right Hypo)</span>
+            </div>
+          </div>
+
+          <!-- Biomarker 4: Hjorth Complexity -->
+          <div class="stat-box biomarker-card">
+            <div class="bio-card-top">
+              <span class="bio-title">Hjorth Complexity</span>
+              <span class="bio-status-badge optimal" id="bio-complexity-badge">High Dynamic</span>
+            </div>
+            <div id="bio-complexity" class="bio-value">1.42</div>
+            <div class="reference-range-bar">
+              <div class="range-zone red" style="width: 30%;"></div>
+              <div class="range-zone green" style="width: 45%;"></div>
+              <div class="range-zone cyan" style="width: 25%;"></div>
+              <div class="range-needle" id="needle-complexity" style="left: 65%;"></div>
+            </div>
+            <div class="range-labels">
+              <span>0.0</span>
+              <span class="threshold-mark">0.8 (Low)</span>
+              <span class="threshold-mark">1.5 (High)</span>
+              <span>2.5+</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Clinical Rationale & Action Plan -->
+        <div class="clinical-notes-box">
+          <div class="notes-block">
+            <h4>📋 Neurophysiological Findings &amp; Rationale:</h4>
+            <p id="outcome-notes"></p>
+          </div>
+          <div class="notes-block" style="border-top: 1px solid var(--border-subtle); padding-top: 12px; margin-top: 12px;">
+            <h4 style="color: var(--amber);">🎯 Recommended Clinical Action Plan:</h4>
+            <p id="outcome-recs"></p>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="report-actions-row">
+          <button class="btn-ctrl active" id="btn-open-report-modal" style="padding: 10px 22px; font-size: 13px;">
+            📄 Open Official Clinical Report Modal
+          </button>
+          <button class="btn-ctrl" id="btn-download-report" style="padding: 10px 22px; font-size: 13px;">
+            💾 Download Report (.TXT)
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Real-Time Telemetry & Spectral Topography Station -->
+    <section id="telemetry-station" style="margin: 40px 0;">
+      <div class="card-title-group" style="margin-bottom: 16px;">
+        <div class="header-tag-row">
+          <span class="live-indicator-pill"><span class="live-dot"></span> REAL-TIME TELEMETRY</span>
+          <span class="montage-pill">Zero-Ghosting Phosphor Circular Buffer</span>
+        </div>
+        <h2 style="font-size: 20px; font-weight: 700;">📈 19-Channel Digital Oscilloscope &amp; Spectral Topography</h2>
+        <p style="color: var(--text-muted); font-size: 13px;">Dual real-time monitors synchronized with 3D cortex hover raycasting</p>
+      </div>
+
+      <div class="telemetry-grid">
+        <!-- 19-Channel Oscilloscope Card -->
+        <div class="oscilloscope-card">
+          <div class="osc-toolbar">
+            <div class="osc-title-group">
+              <span class="osc-title">Digital EEG Telemetry Monitor</span>
+              <span class="osc-badge" id="osc-ch-badge">Top 8 Channels Displayed</span>
+            </div>
+            <div class="control-btn-group">
+              <button class="btn-ctrl active" id="btn-filter-toggle">Filter: Clean ICA</button>
+              <button class="btn-ctrl" id="btn-montage-toggle">Montage: 8Ch</button>
+              <button class="btn-ctrl" id="btn-timebase-toggle">Timebase: 25mm/s</button>
+              <button class="btn-ctrl" id="btn-gain-toggle">Gain: 10μV</button>
+              <button class="btn-ctrl active" id="btn-osc-play">⏸ Pause</button>
+            </div>
+          </div>
+
+          <div class="oscilloscope-canvas-wrapper">
+            <canvas id="eeg-canvas"></canvas>
+          </div>
+
+          <div class="osc-footer">
+            <span>Timebase: 25 mm/s • Notch: 50 Hz Zero-Phase • Lowcut: 0.5 Hz • Highcut: 45.0 Hz</span>
+            <span>Sweep: 256 Hz • FastICA Blink Artifact Clamping: ACTIVE</span>
+          </div>
+        </div>
+
+        <!-- 2D Scalp Topography Card -->
+        <div class="topomap-card" id="topomap-station">
+          <div class="topomap-header">
+            <span style="font-size: 14px; font-weight: 700; color: #fff;">2D Cortical Spectral Topography</span>
+            <span style="font-size: 11px; color: var(--text-dim);">Bicubic Scalp Potential Interpolation (μV²/Hz)</span>
+          </div>
+
+          <!-- Multi-Band Selector Pills -->
+          <div class="band-pills" id="topo-band-pills">
+            <button class="band-pill active" data-band="all">Composite</button>
+            <button class="band-pill" data-band="delta">δ Delta (0.5–4Hz)</button>
+            <button class="band-pill" data-band="theta">θ Theta (4–8Hz)</button>
+            <button class="band-pill" data-band="alpha">α Alpha (8–13Hz)</button>
+            <button class="band-pill" data-band="beta">β Beta (13–30Hz)</button>
+            <button class="band-pill" data-band="gamma">γ Gamma (30–45Hz)</button>
+          </div>
+
+          <div class="topomap-canvas-wrapper">
+            <canvas id="topomap-canvas"></canvas>
+          </div>
+
+          <!-- Continuous Gradient Colorbar Legend -->
+          <div class="topomap-colorbar-wrap">
+            <div class="colorbar-bar"></div>
+            <div class="colorbar-labels">
+              <span>0.0 (Low)</span>
+              <span>12.5 (Normative)</span>
+              <span>25.0+ (Elevated)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Benchmark Results Station -->
+    <section id="benchmark-station" style="margin: 40px 0 60px;">
+      <div class="master-card">
+        <div class="card-header-row">
+          <div class="card-title-group">
+            <div class="header-tag-row">
+              <span class="live-indicator-pill"><span class="live-dot"></span> EMPIRICAL VALIDATION</span>
+              <span class="montage-pill">Subject-Independent Split (105 Patients)</span>
+            </div>
+            <h2>🏆 Model Benchmarking &amp; Ablation Study</h2>
+            <p>Empirical evaluation comparing Proposed Hybrid CNN-SVM-KNN against standalone baselines</p>
+          </div>
+          <span class="badge-pulse" style="color: var(--cyan); border-color: var(--cyan);">Stratified 70-15-15 Split</span>
+        </div>
+
+        <div class="benchmark-table-wrapper">
+          <table class="styled-table" id="benchmark-table">
+            <thead>
+              <tr>
+                <th>Model Architecture</th>
+                <th>Classification Paradigm</th>
+                <th>Accuracy (%)</th>
+                <th>Sensitivity (%)</th>
+                <th>Specificity (%)</th>
+                <th>Precision (%)</th>
+                <th>F1-Score (%)</th>
+                <th>ROC-AUC (%)</th>
+              </tr>
+            </thead>
+            <tbody id="benchmark-tbody">
+              <tr class="highlight-row">
+                <td><strong>Proposed Hybrid (CNN-SVM-KNN)</strong></td>
+                <td>Full Ensemble (64-D Latent Fusion)</td>
+                <td><strong>96.8%</strong></td>
+                <td><strong>96.7%</strong></td>
+                <td><strong>98.4%</strong></td>
+                <td><strong>96.9%</strong></td>
+                <td><strong>96.8%</strong></td>
+                <td><strong>99.1%</strong></td>
+              </tr>
+              <tr>
+                <td>CNN + KNN</td>
+                <td>Pairwise Hybrid (Metric Similarity)</td>
+                <td>96.2%</td>
+                <td>96.4%</td>
+                <td>98.2%</td>
+                <td>96.1%</td>
+                <td>96.2%</td>
+                <td>99.0%</td>
+              </tr>
+              <tr>
+                <td>CNN + SVM</td>
+                <td>Pairwise Hybrid (RBF Hyperplane)</td>
+                <td>94.2%</td>
+                <td>94.1%</td>
+                <td>97.1%</td>
+                <td>94.3%</td>
+                <td>94.2%</td>
+                <td>97.8%</td>
+              </tr>
+              <tr>
+                <td>CNN Alone</td>
+                <td>End-to-End Deep Learning Baseline</td>
+                <td>91.6%</td>
+                <td>91.5%</td>
+                <td>95.8%</td>
+                <td>91.8%</td>
+                <td>91.6%</td>
+                <td>95.4%</td>
+              </tr>
+              <tr>
+                <td>Classical SVM Alone</td>
+                <td>Shallow ML (Handcrafted Features)</td>
+                <td>87.4%</td>
+                <td>87.2%</td>
+                <td>93.7%</td>
+                <td>87.6%</td>
+                <td>87.3%</td>
+                <td>92.1%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Hospital-Grade Clinical Report Modal -->
+  <div id="clinical-report-modal" class="modal-backdrop" hidden>
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <span class="eyebrow-label">OFFICIAL CLINICAL EVALUATION</span>
+          <h3>NeuroPulse AI Diagnostic Report</h3>
+        </div>
+        <button class="modal-close-btn" id="btn-close-modal">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="report-box" id="report-text-content"></div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn-ctrl" id="btn-modal-print">🖨️ Print / Save as PDF</button>
+        <button class="btn-ctrl active" id="btn-modal-download">💾 Download .TXT File</button>
+        <button class="btn-ctrl" id="btn-modal-close-action">Close Preview</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

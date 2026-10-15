@@ -1,0 +1,6 @@
+Model,Type,Accuracy (%),Sensitivity (%),Specificity (%),Precision (%),F1-Score (%),ROC-AUC (%)
+Proposed Hybrid (CNN-SVM-KNN),Full Hybrid Ensemble,91.25,92.0,95.76,92.05,91.4,99.73
+CNN Alone,Deep Learning Baseline,83.75,85.33,92.12,87.61,83.91,99.68
+CNN + SVM,Pairwise Hybrid,92.5,93.11,96.36,92.97,92.61,99.71
+CNN + KNN,Pairwise Hybrid,96.25,96.44,98.18,96.15,96.24,98.96
+Classical SVM Alone,Shallow Machine Learning,100.0,100.0,100.0,100.0,100.0,100.0

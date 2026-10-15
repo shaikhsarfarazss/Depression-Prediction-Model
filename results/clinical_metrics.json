@@ -1,0 +1,51 @@
+{
+  "overall_accuracy": 91.25,
+  "macro_sensitivity": 92.0,
+  "macro_specificity": 95.76,
+  "macro_precision": 92.05,
+  "macro_f1": 91.4,
+  "roc_auc": 99.73,
+  "confusion_matrix": [
+    [
+      25,
+      0,
+      0
+    ],
+    [
+      0,
+      24,
+      6
+    ],
+    [
+      1,
+      0,
+      24
+    ]
+  ],
+  "per_class": {
+    "Normal": {
+      "accuracy": 98.75,
+      "sensitivity": 100.0,
+      "specificity": 98.18,
+      "precision": 96.15,
+      "f1_score": 98.04,
+      "support": 25
+    },
+    "Alzheimer's Disease": {
+      "accuracy": 92.5,
+      "sensitivity": 80.0,
+      "specificity": 100.0,
+      "precision": 100.0,
+      "f1_score": 88.89,
+      "support": 30
+    },
+    "Depression": {
+      "accuracy": 91.25,
+      "sensitivity": 96.0,
+      "specificity": 89.09,
+      "precision": 80.0,
+      "f1_score": 87.27,
+      "support": 25
+    }
+  }
+}

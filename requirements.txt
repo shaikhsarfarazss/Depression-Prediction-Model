@@ -1,0 +1,15 @@
+torch
+numpy
+pandas
+scipy
+scikit-learn
+pywavelets
+matplotlib
+seaborn
+streamlit
+pyyaml
+joblib
+fastapi
+uvicorn
+python-multipart
+mne
